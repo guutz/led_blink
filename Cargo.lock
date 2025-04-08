@@ -72,8 +72,18 @@ version = "0.1.0"
 dependencies = [
  "cortex-m",
  "cortex-m-rt",
+ "lpc8n04-pac",
  "panic-halt",
  "rtt-target",
+]
+
+[[package]]
+name = "lpc8n04-pac"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "critical-section",
+ "vcell",
 ]
 
 [[package]]

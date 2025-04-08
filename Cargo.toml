@@ -9,5 +9,6 @@ panic = "abort"
 [dependencies]
 cortex-m = { version = "0.7.7", features = ["critical-section", "critical-section-single-core"] }
 cortex-m-rt = "0.7.5"
+lpc8n04-pac = { version = "0.1.0", path = "../lpc8n04-pac", features = ["critical-section"] }
 panic-halt = "1.0.0"
 rtt-target = "0.6.1"
