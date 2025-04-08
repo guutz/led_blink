@@ -1,0 +1,14 @@
+[default.general]
+chip = "LPC8N04FHI24"
+
+[default.reset]
+halt_afterwards = false
+
+[default.gdb]
+enabled = false
+
+[default.flashing]
+enabled = true
+
+[default.rtt]
+enabled = false
