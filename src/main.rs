@@ -4,10 +4,12 @@
 use cortex_m_rt::entry;
 use panic_halt as _;
 use lpc8n04_pac::Peripherals;
+// use rtt_target::{rtt_init_print, rprintln};
 
 #[entry]
 fn main() -> ! {
     let p: Peripherals = Peripherals::take().unwrap();
+    // rtt_init_print!();
 
     // Enable the GPIO clock
     p.syscon.sysahbclkctrl().modify(|_, w| {
@@ -22,14 +24,14 @@ fn main() -> ! {
     // Set the GPIO direction for PIO0_3 to output
     p.gpio.dir().modify(|r, w| unsafe { w.io().bits(
         r.io().bits() | (1 << 3) 
-     ) });
+    ) });
 
     let mut led_on: bool = false;
     loop{
-        p.gpio.gpiodata(0x3ffc).write(|w| unsafe {
-            w.data().bits( if led_on { 0x3ffc } else { 0 } ) // Set PIO0_3 high or low
-        });        
-        cortex_m::asm::delay(100_000);
-        led_on = !led_on; // Toggle the LED state
+        p.gpio.gpiodata(0xFF).write(|w| unsafe {
+            w.data().bits( (led_on as u16) << 3 )
+        });
+        cortex_m::asm::delay(1_000_000);
+        led_on = !led_on;
     }
 }

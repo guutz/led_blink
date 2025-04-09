@@ -2,6 +2,18 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Attach to LPC8N04 (DAPLink GDB Server)",
+      "type": "cortex-debug",
+      "request": "attach",
+      "servertype": "external",
+      "gdbTarget": "localhost:1337",
+      "cwd": "${workspaceRoot}",
+      "executable": "${workspaceRoot}/target/thumbv6m-none-eabi/debug/led_blink",
+      "device": "LPC8N04",
+      "svdFile": "${workspaceRoot}/LPC8N04.svd",
+      "showDevDebugOutput": "both",
+    },
+    {
       "type": "probe-rs-debug",
       "request": "launch",
       "name": "probe_rs Executable launch example",

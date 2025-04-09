@@ -2,15 +2,13 @@
 chip = "LPC8N04FHI24"
 
 [default.reset]
-halt_afterwards = false
+halt_afterwards = true
 
 [default.gdb]
-enabled = false
+enabled = true
 
 [default.flashing]
 enabled = true
 
 [default.rtt]
 enabled = false
-
-[defaul]
