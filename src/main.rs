@@ -30,8 +30,16 @@ fn main() -> ! {
     ) });
 
     loop{
-        toggle_led(&p);
-        cortex_m::asm::delay(100_000); // Delay for a while
+        dit(&p);
+        dit(&p);
+        dit(&p);
+        dah(&p);
+        dah(&p);
+        dah(&p);
+        dit(&p);
+        dit(&p);
+        dit(&p);
+        space();
     }
 }
 
@@ -43,4 +51,28 @@ fn toggle_led(p: &lpc8n04_pac::Peripherals) {
         // Toggle the state
         w.data().bits(current_state ^ GPIODATA_MASK_PIO0_3 as u16)
     });
+}
+
+const DIT_DELAY: u32 = 100_000;
+const DAH_DELAY: u32 = 300_000;
+const SPACE_DELAY: u32 = 100_000;
+const WORD_SPACE_DELAY: u32 = 700_000;
+const MULTIPLIER: u32 = 5;
+
+fn dit(p: &lpc8n04_pac::Peripherals) {
+    toggle_led(&p);
+    cortex_m::asm::delay(DIT_DELAY / MULTIPLIER);
+    toggle_led(&p);
+    cortex_m::asm::delay(SPACE_DELAY / MULTIPLIER);
+}
+
+fn dah(p: &lpc8n04_pac::Peripherals) {
+    toggle_led(&p);
+    cortex_m::asm::delay(DAH_DELAY / MULTIPLIER);
+    toggle_led(&p);
+    cortex_m::asm::delay(SPACE_DELAY / MULTIPLIER);
+}
+
+fn space() {
+    cortex_m::asm::delay(WORD_SPACE_DELAY / MULTIPLIER);
 }
