@@ -3,10 +3,11 @@ target = "thumbv6m-none-eabi"
 
 [target.thumbv6m-none-eabi]
 rustflags = [
-  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tmemory2.x",
 ]
-runner = "probe-rs run --chip lpc8n04 --chip-description-path target/definition.yaml"
+runner = "probe-rs run --chip lpc8n04 --chip-description-path definition.yaml"
 
 [alias]
 rr = "run --release"
 br = "build --release"
+er = "embed --release"

@@ -1,36 +1,78 @@
 #![no_std]
 #![no_main]
 
+mod vector_table;
 use cortex_m_rt::entry;
 use panic_halt as _;
-// use rtt_target::{rprintln, rtt_init_print};
+use lpc8n04_pac::Peripherals;
+// use rtt_target::{rtt_init_print, rprintln};
+
+const GPIODATA_MASK_PIO0_3: usize = 1 << 3;
 
 #[entry]
 fn main() -> ! {
+    let p: Peripherals = Peripherals::take().unwrap();
     // rtt_init_print!();
-    // rprintln!("Hello, world!");
-    const SYSAHBCLKCTRL: *mut u32 = 0x4004_8080 as *mut u32; // clock control register
-    const GPIO_DIR: *mut u32 = 0x5000_8000 as *mut u32; // GPIO direction register
-    const IOCON_PIO0_3: *mut u32 = 0x4004_400C as *mut u32; // IOCON register for pin PIO0_3
-    const GPIO_DATA_MASK_ALL: *mut u32 = 0x5000_3FFC as *mut u32; // GPIO data mask register
-    let mut led_on: bool = false;
-    unsafe {
-        // Enable GPIO clock
-        let sysahbclkctrl: u32 = SYSAHBCLKCTRL.read_volatile();
-        SYSAHBCLKCTRL.write_volatile(sysahbclkctrl | (1 << 6)); // Enable GPIO clock
 
-        // Set PIO0_3 to GPIO function
-        IOCON_PIO0_3.write_volatile(0); // Set PIO0_3 to GPIO function
+    // Enable the GPIO clock
+    p.syscon.sysahbclkctrl().modify(|_, w| {
+        w.gpio().bit(true)
+    });
 
-        // Set GPIO direction for PIO0_3 to output
-        let dir: u32 = GPIO_DIR.read_volatile();
-        GPIO_DIR.write_volatile(dir | (1 << 3));
-    }
+    // Set the GPIO function for PIO0_3 to GPIO
+    p.iocon.pio03().modify(|_, w| {
+        w.func().set(0)
+    });
+
+    // Set the GPIO direction for PIO0_3 to output
+    p.gpio.dir().modify(|r, w| unsafe { w.io().bits(
+        r.io().bits() | (1 << 3) 
+    ) });
+
     loop{
-        unsafe {
-            GPIO_DATA_MASK_ALL.write_volatile( (led_on as u32) << 3 ); // Set PIO0_3 to high or low
-        }
-        cortex_m::asm::delay(5_000_000);
-        led_on = !led_on; // Toggle the LED state
+        dit(&p);
+        dit(&p);
+        dit(&p);
+        dah(&p);
+        dah(&p);
+        dah(&p);
+        dit(&p);
+        dit(&p);
+        dit(&p);
+        space();
     }
+}
+
+fn toggle_led(p: &lpc8n04_pac::Peripherals) {
+    // Toggle the LED state
+    p.gpio.gpiodata(GPIODATA_MASK_PIO0_3).modify(|r, w| unsafe {
+        // Read the current state of the GPIO pin
+        let current_state = r.data().bits();
+        // Toggle the state
+        w.data().bits(current_state ^ GPIODATA_MASK_PIO0_3 as u16)
+    });
+}
+
+const DIT_DELAY: u32 = 100_000;
+const DAH_DELAY: u32 = 300_000;
+const SPACE_DELAY: u32 = 100_000;
+const WORD_SPACE_DELAY: u32 = 700_000;
+const MULTIPLIER: u32 = 5;
+
+fn dit(p: &lpc8n04_pac::Peripherals) {
+    toggle_led(&p);
+    cortex_m::asm::delay(DIT_DELAY / MULTIPLIER);
+    toggle_led(&p);
+    cortex_m::asm::delay(SPACE_DELAY / MULTIPLIER);
+}
+
+fn dah(p: &lpc8n04_pac::Peripherals) {
+    toggle_led(&p);
+    cortex_m::asm::delay(DAH_DELAY / MULTIPLIER);
+    toggle_led(&p);
+    cortex_m::asm::delay(SPACE_DELAY / MULTIPLIER);
+}
+
+fn space() {
+    cortex_m::asm::delay(WORD_SPACE_DELAY / MULTIPLIER);
 }
