@@ -1,10 +1,13 @@
 #![no_std]
 #![no_main]
 
+mod vector_table;
 use cortex_m_rt::entry;
 use panic_halt as _;
 use lpc8n04_pac::Peripherals;
 // use rtt_target::{rtt_init_print, rprintln};
+
+const GPIODATA_MASK_PIO0_3: usize = 1 << 3;
 
 #[entry]
 fn main() -> ! {
@@ -26,12 +29,18 @@ fn main() -> ! {
         r.io().bits() | (1 << 3) 
     ) });
 
-    let mut led_on: bool = false;
     loop{
-        p.gpio.gpiodata(0xFF).write(|w| unsafe {
-            w.data().bits( (led_on as u16) << 3 )
-        });
-        cortex_m::asm::delay(1_000_000);
-        led_on = !led_on;
+        toggle_led(&p);
+        cortex_m::asm::delay(100_000); // Delay for a while
     }
+}
+
+fn toggle_led(p: &lpc8n04_pac::Peripherals) {
+    // Toggle the LED state
+    p.gpio.gpiodata(GPIODATA_MASK_PIO0_3).modify(|r, w| unsafe {
+        // Read the current state of the GPIO pin
+        let current_state = r.data().bits();
+        // Toggle the state
+        w.data().bits(current_state ^ GPIODATA_MASK_PIO0_3 as u16)
+    });
 }
